@@ -5,8 +5,9 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Scene;
 
-namespace GameDemo;
+namespace GameScene;
 
 public enum Direction
 {
@@ -19,11 +20,9 @@ public enum Direction
   X = Left | Right,
 }
 
-public class Snake : Game
+
+public class SnakeScene : Scene.Scene
 {
-  private GraphicsDeviceManager _graphics;
-  private SpriteBatch _spriteBatch;
-  private SpriteFont _font;
   private Song _bgm;
   private SoundEffect _eat;
   private SoundEffect _levelUp;
@@ -32,9 +31,9 @@ public class Snake : Game
   private Texture2D _circle;
   private Point _food;
   private Direction _direction = Direction.Right;
-  private readonly int _height;
-  private readonly int _width;
-  private readonly int _latticeSize;
+  public static readonly int _height = 720;
+  public static readonly int _width = 1280;
+  public static readonly int _latticeSize = 20;
   private readonly int _rows;
   private readonly int _cols;
   private readonly int _padding = 2;
@@ -44,24 +43,15 @@ public class Snake : Game
   private double _moveInterval = .1;
   private int _score = 0;
 
-  public Snake(int width = 1280, int height = 720, int latticeSize = 20)
+  public SnakeScene(SceneContext context) : base(context)
   {
-    // _windowSize = (width, height);
-    _width = width;
-    _height = height;
-    _rows = height / latticeSize;
-    _cols = width / latticeSize;
-    _latticeSize = latticeSize;
-    _graphics = new GraphicsDeviceManager(this);
+    _rows = _height / _latticeSize;
+    _cols = _width / _latticeSize;
     Content.RootDirectory = "Content";
-    IsMouseVisible = true;
   }
 
-  protected override void Initialize()
+  public override void Initialize()
   {
-    _graphics.PreferredBackBufferWidth = _width;
-    _graphics.PreferredBackBufferHeight = _height;
-    _graphics.ApplyChanges();
     _lattice = GetTexture(GraphicsDevice, Color.White);
     _circle = GetCircle(GraphicsDevice, _latticeSize / 2, Color.Orange);
     _food = GenerateFood();
@@ -69,10 +59,8 @@ public class Snake : Game
     base.Initialize();
   }
 
-  protected override void LoadContent()
+  public override void LoadContent()
   {
-    _spriteBatch = new SpriteBatch(GraphicsDevice);
-    _font = Content.Load<SpriteFont>("default");
     _bgm = Content.Load<Song>("music/bgm");
     _eat = Content.Load<SoundEffect>("music/eat");
     _levelUp = Content.Load<SoundEffect>("music/level up");
@@ -85,30 +73,12 @@ public class Snake : Game
       MediaPlayer.Stop();
     }
     MediaPlayer.Play(_bgm);
+    base.LoadContent();
   }
 
-  protected override void Update(GameTime gameTime)
+  public override void Update(GameTime gametime)
   {
-    _moveTimer += gameTime.ElapsedGameTime.TotalSeconds;
-
-    var keyboardState = Keyboard.GetState();
-    if (keyboardState.IsKeyDown(Keys.Up))
-    {
-      ChangeDirection(Direction.Up);
-    }
-    if (keyboardState.IsKeyDown(Keys.Down))
-    {
-      ChangeDirection(Direction.Down);
-    }
-    if (keyboardState.IsKeyDown(Keys.Left))
-    {
-      ChangeDirection(Direction.Left);
-    }
-    if (keyboardState.IsKeyDown(Keys.Right))
-    {
-      ChangeDirection(Direction.Right);
-    }
-
+    _moveTimer += gametime.ElapsedGameTime.TotalSeconds;
 
     if (_moveTimer >= _moveInterval)
     {
@@ -173,29 +143,51 @@ public class Snake : Game
         }
       }
     }
-    base.Update(gameTime);
+
+    base.Update(gametime);
   }
 
-  protected override void Draw(GameTime gameTime)
+  protected override void ListenKeyboard(KeyboardState currentState, KeyboardState prevState)
+  {
+    if (currentState.IsKeyDown(Keys.Up) || currentState.IsKeyDown(Keys.W))
+    {
+      ChangeDirection(Direction.Up);
+    }
+    if (currentState.IsKeyDown(Keys.Down) || currentState.IsKeyDown(Keys.S))
+    {
+      ChangeDirection(Direction.Down);
+    }
+    if (currentState.IsKeyDown(Keys.Left) || currentState.IsKeyDown(Keys.A))
+    {
+      ChangeDirection(Direction.Left);
+    }
+    if (currentState.IsKeyDown(Keys.Right) || currentState.IsKeyDown(Keys.D))
+    {
+      ChangeDirection(Direction.Right);
+    }
+    base.ListenKeyboard(currentState, prevState);
+  }
+
+  public override void Draw(GameTime gameTime)
   {
     GraphicsDevice.Clear(Color.CornflowerBlue);
 
-    _spriteBatch.Begin();
-    _spriteBatch.Draw(_circle, new Rectangle(_food.X * _latticeSize, _food.Y * _latticeSize, _latticeSize, _latticeSize), Color.Orange);
-    _spriteBatch.End();
+    Context.SpriteBatch.Begin();
+    Context.SpriteBatch.Draw(_circle, new Rectangle(_food.X * _latticeSize, _food.Y * _latticeSize, _latticeSize, _latticeSize), Color.Orange);
+    Context.SpriteBatch.End();
 
-    _spriteBatch.Begin();
+    Context.SpriteBatch.Begin();
     foreach (var item in _snake)
     {
-      _spriteBatch.Draw(_lattice, new Rectangle(item.X * _latticeSize, item.Y * _latticeSize, _latticeSize, _latticeSize), Color.Black);
+      Context.SpriteBatch.Draw(_lattice, new Rectangle(item.X * _latticeSize, item.Y * _latticeSize, _latticeSize, _latticeSize), Color.Black);
     }
-    _spriteBatch.End();
+    Context.SpriteBatch.End();
 
-    _spriteBatch.Begin();
+    Context.SpriteBatch.Begin();
     var scoreText = $"Score: {_score}";
-    var scoreSize = _font.MeasureString(scoreText);
-    _spriteBatch.DrawString(_font, scoreText, scoreSize, Color.Black);
-    _spriteBatch.End();
+    var scoreSize = Context.Font.MeasureString(scoreText);
+    Context.SpriteBatch.DrawString(Context.Font, scoreText, scoreSize, Color.Black);
+    Context.SpriteBatch.End();
 
     base.Draw(gameTime);
   }

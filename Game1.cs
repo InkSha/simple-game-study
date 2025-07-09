@@ -1,5 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameScene;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Scene;
 
 namespace simple_game_studty;
 
@@ -8,12 +10,30 @@ public class Game1 : Game
   private GraphicsDeviceManager _graphics;
   private SpriteBatch _spriteBatch;
   private SpriteFont _font;
+  private SceneContext _sceneContext;
+  private SceneManager _sceneManager;
 
   public Game1()
   {
     _graphics = new GraphicsDeviceManager(this);
+    _graphics.PreferredBackBufferHeight = SnakeScene._height;
+    _graphics.PreferredBackBufferWidth = SnakeScene._width;
+    _graphics.ApplyChanges();
     Content.RootDirectory = "Content";
     IsMouseVisible = true;
+  }
+
+  public SnakeScene GetSnakeScene()
+  {
+    // var scene = new SnakeScene(_sceneContext)
+    // {
+    //   ToggleScene = () =>
+    //   {
+
+    //   }
+    // };
+    // return scene;
+    return new(_sceneContext);
   }
 
   protected override void Initialize()
@@ -25,17 +45,21 @@ public class Game1 : Game
   {
     _spriteBatch = new SpriteBatch(GraphicsDevice);
     _font = Content.Load<SpriteFont>("default");
+    _sceneContext = new(Services, Content.RootDirectory, GraphicsDevice, _spriteBatch, _font);
+    _sceneManager = new();
+    _sceneManager.LoadScene(GetSnakeScene());
   }
 
   protected override void Update(GameTime gameTime)
   {
     base.Update(gameTime);
+    _sceneManager.Update(gameTime);
   }
 
   protected override void Draw(GameTime gameTime)
   {
     GraphicsDevice.Clear(Color.CornflowerBlue);
-
+    _sceneManager.Draw(gameTime);
     base.Draw(gameTime);
   }
 }
