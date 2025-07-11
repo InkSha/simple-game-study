@@ -23,19 +23,6 @@ public class Game1 : Game
     IsMouseVisible = true;
   }
 
-  public SnakeScene GetSnakeScene()
-  {
-    // var scene = new SnakeScene(_sceneContext)
-    // {
-    //   ToggleScene = () =>
-    //   {
-
-    //   }
-    // };
-    // return scene;
-    return new(_sceneContext);
-  }
-
   protected override void Initialize()
   {
     base.Initialize();
@@ -47,7 +34,7 @@ public class Game1 : Game
     _font = Content.Load<SpriteFont>("default");
     _sceneContext = new(Services, Content.RootDirectory, GraphicsDevice, _spriteBatch, _font);
     _sceneManager = new();
-    _sceneManager.LoadScene(GetSnakeScene());
+    _sceneManager.LoadScene(new Title(_sceneContext));
   }
 
   protected override void Update(GameTime gameTime)

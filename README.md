@@ -4,10 +4,10 @@ Use study [monogame](https://monogame.net/) framework.
 
 ## Todos
 
-- [ ] Sanke
-  - [ ] Grid system
-  - [ ] Input control
-  - [ ] State management
+- [X] Sanke
+  - [X] Grid system
+  - [X] Input control
+  - [X] State management
 - [ ] Breakout
   - [ ] Collision detection
   - [ ] Physics rebound
